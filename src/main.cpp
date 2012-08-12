@@ -23,7 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include "../AmmServerlib/AmmServerlib.h"
+#include "../AmmarServer/src/AmmServerlib/AmmServerlib.h"
 
 #define MAX_BINDING_PORT 65534
 #define DEFAULT_BINDING_PORT 8081
@@ -31,7 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define MAX_FILE_PATH 512
 
 
-#include "VideoInput/VideoInput.h"
+#include "../VideoInput/VideoInput.h"
 #include <linux/videodev2.h>
 
 
@@ -50,6 +50,7 @@ unsigned long jpg_snap_size=0;
 void * prepare_index_page_callback()
 {
   //Nothing to do :P
+  return 0;
 }
 
 int open_camera()
@@ -63,7 +64,8 @@ int open_camera()
 
      if (! InitVideoFeed(0,webcam,320,240,BITRATE,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
 
-     jpg_snap_mem = (char *) malloc(sizeof(char) * 320 * 240 * 3 ); //Jpeg should be smaller than uncompressed RGB :P
+     jpg_snap_size=320 * 240 * 3;
+     jpg_snap_mem = (char *) malloc(sizeof(char) * jpg_snap_size ); //Jpeg should be smaller than uncompressed RGB :P
      if (jpg_snap_mem==0) { fprintf(stderr,"Could not allocate enough memory for jpg snap\n"); return 0; }
 
      index_page_size=strlen((char *)index_page_mem);
@@ -81,13 +83,15 @@ int open_camera()
 
 void * prepare_camera_data_callback()
 {
-
+   RecordOneInMem((char*) "bogus.jpg",1,1,jpg_snap_mem,&jpg_snap_size);
+   return 0;
 }
 
 int close_camera()
 {
     if (jpg_snap_mem!=0) { free(jpg_snap_mem); jpg_snap_mem=0; }
     CloseVideoInputs();
+    return 1;
 }
 
 int main(int argc, char *argv[])
@@ -116,8 +120,8 @@ int main(int argc, char *argv[])
 
         AmmServer_Start(bindIP,port,webserver_root,templates_root);
 
-        AmmServer_AddResourceHandler(webserver_root,"/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
-        AmmServer_AddResourceHandler(webserver_root,"/cam.jpg",jpg_snap_mem,&jpg_snap_size,(void *) &prepare_camera_data_callback);
+        AmmServer_AddResourceHandler(webserver_root,(char *) "/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
+        AmmServer_AddResourceHandler(webserver_root,(char *) "/cam.jpg",jpg_snap_mem,&jpg_snap_size,(void *) &prepare_camera_data_callback);
 
         while (AmmServer_Running())
            {
