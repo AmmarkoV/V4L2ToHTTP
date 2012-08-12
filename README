@@ -1,0 +1,1 @@
+A Small application that uses my HTTP server and my VideoInput for V4L/V4L2 to directly stream webcam input to the internet via http.. 
