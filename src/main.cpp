@@ -39,7 +39,7 @@ char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
 char templates_root[MAX_FILE_PATH]="public_html/templates/";
 
-char index_page_mem[250]="<html><head><meta http-equiv=\"refresh\" content=\"1;URL='index.html'\"><title>V4L2ToHTTP</title></head><body><br><br><br><center><img src=\"cam.jpg\"></center></body></html>"; //Memory Should be allocated fitting size of picture..
+char index_page_mem[250]="<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><br><center><img src=\"cam.jpg\"></center></body></html>"; //Memory Should be allocated fitting size of picture..
 unsigned long index_page_size=0;
 
 
@@ -83,11 +83,13 @@ int open_camera()
 
 void * prepare_camera_data_callback()
 {
+   if (VideoSimulationState()!=LIVE_ON) { fprintf(stderr,"Camera already snapping\n"); return 0; }
    fprintf(stderr,"Calling Camera callback \n");
    jpg_snap_size=320 * 240 * 3;
    RecordOneInMem((char*) "servedAtMem.jpg",0,1,jpg_snap_mem,&jpg_snap_size);
-   jpg_snap_size=4096*4;//todo fix auto retrieval of this value in RecordOneInMem
-   fprintf(stderr,"Calling Camera callback success!\n");
+   while (VideoSimulationState()!=LIVE_ON) { usleep(1); } // Wait until recording is complete..!
+   //jpg_snap_size=4096*4;//todo fix auto retrieval of this value in RecordOneInMem
+   fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpg_snap_size);
    return 0;
 }
 
