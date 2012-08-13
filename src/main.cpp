@@ -34,12 +34,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "../VideoInput/VideoInput.h"
 #include <linux/videodev2.h>
 
+#define SIMPLE_INDEX 0
 
 char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
 char templates_root[MAX_FILE_PATH]="public_html/templates/";
 
-char index_page_mem[250]="<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><br><center><img src=\"cam.jpg\"></center></body></html>"; //Memory Should be allocated fitting size of picture..
+char * index_page_mem=0;
 unsigned long index_page_size=0;
 
 
@@ -48,6 +49,46 @@ char * jpg_snap_mem=0; //Memory Should be allocated fitting size of picture..
 unsigned long jpg_snap_size=0;
 unsigned long jpg_snap_full_size=0;
 
+
+void create_index_page()
+{
+  index_page_mem  = (char * ) malloc(sizeof(char) * 4096);
+
+  if (SIMPLE_INDEX)
+  {
+    strcpy(index_page_mem,"<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><center><img src=\"cam.jpg\"><br><h3><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>");
+  } else
+  {
+
+    strcpy(index_page_mem,"<html>\n");
+    strcat(index_page_mem,"    <head>\n");
+    strcat(index_page_mem,"         <title>V4L2ToHTTP</title>\n");
+    strcat(index_page_mem,"         <script language=\"JavaScript\"><!--\n");
+    strcat(index_page_mem,"                var newImage = new Image();\n");
+    strcat(index_page_mem,"                var number = 0;\n");
+    strcat(index_page_mem,"                newImage.src = \"cam.jpg\";\n");
+    strcat(index_page_mem,"                 function updateImage()\n");
+    strcat(index_page_mem,"                    {\n");
+    strcat(index_page_mem,"                           if(newImage.complete)\n");
+    strcat(index_page_mem,"                           {\n");
+    strcat(index_page_mem,"                                document.getElementById(\"LiveImage\").src = newImage.src;\n");
+    strcat(index_page_mem,"                                if(newImage.complete)\n");
+    strcat(index_page_mem,"                                 {\n");
+    strcat(index_page_mem,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
+    strcat(index_page_mem,"                                      newImage = new Image();\n");
+    strcat(index_page_mem,"                                      number++;\n");
+    strcat(index_page_mem,"                                     newImage.src = \"cam.jpg\"\n"); //Later on make it cam.jpg?inc=\" + number;
+    strcat(index_page_mem,"                                   }\n");
+    strcat(index_page_mem,"                        }\n                     setTimeout('updateImage()',550);\n");
+    strcat(index_page_mem,"                   }\n");
+    strcat(index_page_mem,"               //--></script>\n");
+    strcat(index_page_mem,"</head>\n");
+    strcat(index_page_mem,"<body  onLoad=\"setTimeout('updateImage()',550)\">\n");
+    strcat(index_page_mem,"<br><br><center><img src=\"cam.jpg\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>\n");
+  }
+
+  index_page_size=strlen((char *)index_page_mem);
+}
 
 void * prepare_index_page_callback()
 {
@@ -73,7 +114,8 @@ int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
      jpg_snap_mem = (char *) malloc(sizeof(char) * jpg_snap_size ); //Jpeg should be smaller than uncompressed RGB :P
      if (jpg_snap_mem==0) { fprintf(stderr,"Could not allocate enough memory for jpg snap\n"); return 0; }
 
-     index_page_size=strlen((char *)index_page_mem);
+
+     create_index_page();
 
 
     int MAX_waittime=10000;
