@@ -66,7 +66,7 @@ int open_camera(unsigned int width,unsigned int height)
     jpg_width=width;
     jpg_height=height;
 
-     if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
+     if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,60,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
 
      jpg_snap_size=jpg_width * jpg_height * 3;
      jpg_snap_full_size=jpg_snap_size;
