@@ -43,8 +43,10 @@ char index_page_mem[250]="<html><head><meta http-equiv=\"refresh\" content=\"1\"
 unsigned long index_page_size=0;
 
 
+unsigned int jpg_width=320,jpg_height=240;
 char * jpg_snap_mem=0; //Memory Should be allocated fitting size of picture..
 unsigned long jpg_snap_size=0;
+unsigned long jpg_snap_full_size=0;
 
 
 void * prepare_index_page_callback()
@@ -53,7 +55,7 @@ void * prepare_index_page_callback()
   return 0;
 }
 
-int open_camera()
+int open_camera(unsigned int width,unsigned int height)
 {
    if ( !InitVideoInputs(1) ) { fprintf(stderr,"Could not open Video Input\n"); return 0; }
 
@@ -61,10 +63,13 @@ int open_camera()
     struct VideoFeedSettings feedsettings={0};
     //videosettings.PixelFormat=V4L2_PIX_FMT_YUYV; BITRATE=16; // <- Common compressed setting for UVC webcams
     feedsettings.PixelFormat=V4L2_PIX_FMT_RGB24; BITRATE=24;   //   <- Common raw setting for UVC webcams ( Run Compat )
+    jpg_width=width;
+    jpg_height=height;
 
-     if (! InitVideoFeed(0,webcam,320,240,BITRATE,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
+     if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
 
-     jpg_snap_size=320 * 240 * 3;
+     jpg_snap_size=jpg_width * jpg_height * 3;
+     jpg_snap_full_size=jpg_snap_size;
      jpg_snap_mem = (char *) malloc(sizeof(char) * jpg_snap_size ); //Jpeg should be smaller than uncompressed RGB :P
      if (jpg_snap_mem==0) { fprintf(stderr,"Could not allocate enough memory for jpg snap\n"); return 0; }
 
@@ -85,7 +90,7 @@ void * prepare_camera_data_callback()
 {
    if (VideoSimulationState()!=LIVE_ON) { fprintf(stderr,"Camera already snapping\n"); return 0; }
    fprintf(stderr,"Calling Camera callback \n");
-   jpg_snap_size=320 * 240 * 3;
+   jpg_snap_size=jpg_snap_full_size;
    RecordOneInMem((char*) "servedAtMem.jpg",0,1,jpg_snap_mem,&jpg_snap_size);
    while (VideoSimulationState()!=LIVE_ON) { usleep(1); } // Wait until recording is complete..!
    //jpg_snap_size=4096*4;//todo fix auto retrieval of this value in RecordOneInMem
@@ -121,7 +126,7 @@ int main(int argc, char *argv[])
    if (argc>=4) { strncpy(templates_root,argv[4],MAX_FILE_PATH); }
 
 
-    if ( open_camera() )
+    if ( open_camera(320,240) )
       {
 
         AmmServer_Start(bindIP,port,webserver_root,templates_root);
