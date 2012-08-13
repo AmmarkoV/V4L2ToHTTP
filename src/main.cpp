@@ -55,7 +55,7 @@ void * prepare_index_page_callback()
   return 0;
 }
 
-int open_camera(unsigned int width,unsigned int height)
+int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
 {
    if ( !InitVideoInputs(1) ) { fprintf(stderr,"Could not open Video Input\n"); return 0; }
 
@@ -66,7 +66,7 @@ int open_camera(unsigned int width,unsigned int height)
     jpg_width=width;
     jpg_height=height;
 
-     if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,60,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
+     if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
 
      jpg_snap_size=jpg_width * jpg_height * 3;
      jpg_snap_full_size=jpg_snap_size;
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
    if (argc>=4) { strncpy(templates_root,argv[4],MAX_FILE_PATH); }
 
 
-    if ( open_camera(320,240) )
+    if ( open_camera(640,480,60) )
       {
 
         AmmServer_Start(bindIP,port,webserver_root,templates_root);
