@@ -63,7 +63,7 @@ void create_index_page()
     strcat(index_page.content,"         <script language=\"JavaScript\"><!--\n");
     strcat(index_page.content,"                var newImage = new Image();\n");
     strcat(index_page.content,"                var number = 0;\n");
-    strcat(index_page.content,"                newImage.src = \"cam.jpg\";\n");
+    strcat(index_page.content,"                newImage.src = \"cam.jpg?i=0\";\n");
     strcat(index_page.content,"                 function updateImage()\n");
     strcat(index_page.content,"                    {\n");
     strcat(index_page.content,"                           if(newImage.complete)\n");
@@ -74,14 +74,14 @@ void create_index_page()
     strcat(index_page.content,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
     strcat(index_page.content,"                                      newImage = new Image();\n");
     strcat(index_page.content,"                                      number++;\n");
-    strcat(index_page.content,"                                     newImage.src = \"cam.jpg\"\n"); //Later on make it cam.jpg?inc=\" + number;
+    strcat(index_page.content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
     strcat(index_page.content,"                                   }\n");
     strcat(index_page.content,"                        }\n                     setTimeout('updateImage()',550);\n");
     strcat(index_page.content,"                   }\n");
     strcat(index_page.content,"               //--></script>\n");
     strcat(index_page.content,"</head>\n");
     strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',550)\">\n");
-    strcat(index_page.content,"<br><br><center><img src=\"cam.jpg\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a>\n");
+    strcat(index_page.content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a>\n");
     strcat(index_page.content,"<br><br><a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h3></center></body></html>\n");
   }
 
