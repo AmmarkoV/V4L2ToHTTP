@@ -55,7 +55,6 @@ void * prepare_index_page_callback()
     }
   else
     {
-
       strcpy(index_page.content,"<html>\n");
       strcat(index_page.content,"    <head>\n");
       strcat(index_page.content,"         <title>V4L2ToHTTP</title>\n");
@@ -81,11 +80,21 @@ void * prepare_index_page_callback()
       strcat(index_page.content,"</head>\n");
       strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',550)\">\n");
       strcat(index_page.content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
-      strcat(index_page.content,"<h3>Viewers online : ");
-      strcat(index_page.content,itoa(AmmServer_GetInfo(AMMINF_ACTIVE_CLIENTS)));
-      strcat(index_page.content,"</h3><br>\n");
-      strcat(index_page.content,"<br><br><a href=\"index.html\">-- Manually Reload Page --</a>\n");
-      strcat(index_page.content,"<br><br><a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h3></center></body></html>\n");
+      strcat(index_page.content,"<h5>Active Clients : ");
+
+      if (AmmServer_GetInfo(AMMINF_ACTIVE_CLIENTS) < 10000 )
+           {
+             char viewers_str[150]={0};
+             sprintf(viewers_str,"%u",AmmServer_GetInfo(AMMINF_ACTIVE_CLIENTS));
+             strcat(index_page.content,viewers_str);
+           } else
+           {
+               strcat(index_page.content,"N/A");
+           }
+
+      strcat(index_page.content,"<br>\n");
+      strcat(index_page.content,"<br><a href=\"index.html\">-- Manually Reload Page --</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n");
+      strcat(index_page.content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
     }
 
   index_page.MAX_content_size=strlen((char *)index_page.content);
@@ -123,9 +132,6 @@ int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
       fprintf(stderr,"Could not allocate enough memory for jpg snap\n");
       return 0;
     }
-
-
-
 
   int MAX_waittime=10000;
   int waittime=0;
