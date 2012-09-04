@@ -81,7 +81,8 @@ void create_index_page()
     strcat(index_page.content,"               //--></script>\n");
     strcat(index_page.content,"</head>\n");
     strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',550)\">\n");
-    strcat(index_page.content,"<br><br><center><img src=\"cam.jpg\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>\n");
+    strcat(index_page.content,"<br><br><center><img src=\"cam.jpg\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a>\n");
+    strcat(index_page.content,"<br><br><a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h3></center></body></html>\n");
   }
 
   index_page.MAX_content_size=strlen((char *)index_page.content);
