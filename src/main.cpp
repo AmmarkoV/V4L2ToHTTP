@@ -151,10 +151,10 @@ void init_dynamic_pages()
    create_index_page();
    strncpy(index_page.web_root_path,webserver_root,MAX_FILE_PATH);
    strncpy(index_page.resource_name,"/index.html",MAX_RESOURCE);
-   index_page.prepare_content_callback=0;//&prepare_index_page_callback;
+   index_page.prepare_content_callback=(void*) &prepare_index_page_callback;
    AmmServer_AddResourceHandler(&index_page); //webserver_root,(char *) "/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
 
-   memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
+   //memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
    strncpy(jpeg_picture.web_root_path,webserver_root,MAX_FILE_PATH);
    strncpy(jpeg_picture.resource_name,"/cam.jpg",MAX_RESOURCE);
    jpeg_picture.prepare_content_callback=(void*) &prepare_camera_data_callback;
