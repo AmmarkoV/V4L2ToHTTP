@@ -42,15 +42,9 @@ char templates_root[MAX_FILE_PATH]="public_html/templates/";
 
 
 struct AmmServer_RH_Context index_page={0};
-char * index_page_mem=0;
-unsigned long index_page_size=0;
-
 
 struct AmmServer_RH_Context jpeg_picture={0};
 unsigned int jpg_width=320,jpg_height=240;
-char * jpg_snap_mem=0; //Memory Should be allocated fitting size of picture..
-unsigned long jpg_snap_size=0;
-unsigned long jpg_snap_full_size=0;
 
 
 void create_index_page()
@@ -90,7 +84,8 @@ void create_index_page()
     strcat(index_page.content,"<br><br><center><img src=\"cam.jpg\" id=\"LiveImage\"><br><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>\n");
   }
 
-  index_page.content_size=strlen((char *)index_page.content);
+  index_page.MAX_content_size=strlen((char *)index_page.content);
+  index_page.content_size=index_page.MAX_content_size;
 }
 
 void * prepare_index_page_callback()
@@ -112,13 +107,12 @@ int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
 
      if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) ) { fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n"); return 0; }
 
-     jpg_snap_size=jpg_width * jpg_height * 3;
-     jpg_snap_full_size=jpg_snap_size;
-     jpg_snap_mem = (char *) malloc(sizeof(char) * jpg_snap_size ); //Jpeg should be smaller than uncompressed RGB :P
-     if (jpg_snap_mem==0) { fprintf(stderr,"Could not allocate enough memory for jpg snap\n"); return 0; }
+     jpeg_picture.content_size=jpg_width * jpg_height * 3;
+     jpeg_picture.MAX_content_size=jpeg_picture.content_size;
+     jpeg_picture.content = (char *) malloc(sizeof(char) * jpeg_picture.content_size ); //Jpeg should be smaller than uncompressed RGB :P
+     if (jpeg_picture.content==0) { fprintf(stderr,"Could not allocate enough memory for jpg snap\n"); return 0; }
 
 
-     create_index_page();
 
 
     int MAX_waittime=10000;
@@ -135,20 +129,44 @@ void * prepare_camera_data_callback()
 {
    if (VideoSimulationState()!=LIVE_ON) { fprintf(stderr,"Camera already snapping\n"); return 0; }
    fprintf(stderr,"Calling Camera callback \n");
-   jpg_snap_size=jpg_snap_full_size;
-   RecordOneInMem((char*) "servedAtMem.jpg",0,1,jpg_snap_mem,&jpg_snap_size);
+   jpeg_picture.content_size=jpeg_picture.MAX_content_size;
+   RecordOneInMem((char*) "servedAtMem.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
    while (VideoSimulationState()!=LIVE_ON) { usleep(1); } // Wait until recording is complete..!
    //jpg_snap_size=4096*4;//todo fix auto retrieval of this value in RecordOneInMem
-   fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpg_snap_size);
+   fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
    return 0;
 }
 
 int close_camera()
 {
-    if (jpg_snap_mem!=0) { free(jpg_snap_mem); jpg_snap_mem=0; }
+    if (jpeg_picture.content!=0) { free(jpeg_picture.content); jpeg_picture.content=0; }
     CloseVideoInputs();
     return 1;
 }
+
+void init_dynamic_pages()
+{
+
+   memset(&index_page,0,sizeof(struct AmmServer_RH_Context));
+   create_index_page();
+   strncpy(index_page.web_root_path,webserver_root,MAX_FILE_PATH);
+   strncpy(index_page.resource_name,"/index.html",MAX_RESOURCE);
+   index_page.prepare_content_callback=0;//&prepare_index_page_callback;
+   AmmServer_AddResourceHandler(&index_page); //webserver_root,(char *) "/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
+
+   memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
+   strncpy(jpeg_picture.web_root_path,webserver_root,MAX_FILE_PATH);
+   strncpy(jpeg_picture.resource_name,"/cam.jpg",MAX_RESOURCE);
+   jpeg_picture.prepare_content_callback=(void*) &prepare_camera_data_callback;
+   AmmServer_AddResourceHandler(&jpeg_picture); //webserver_root,(char *) "/cam.jpg",jpg_snap_mem,&jpg_snap_size,(void *) &prepare_camera_data_callback);
+
+}
+
+void close_dynamic_pages()
+{
+
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -176,15 +194,16 @@ int main(int argc, char *argv[])
 
         AmmServer_Start(bindIP,port,webserver_root,templates_root);
 
-        AmmServer_AddResourceHandler(webserver_root,(char *) "/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
-        AmmServer_AddResourceHandler(webserver_root,(char *) "/cam.jpg",jpg_snap_mem,&jpg_snap_size,(void *) &prepare_camera_data_callback);
+        init_dynamic_pages();
 
         while (AmmServer_Running())
            {
              usleep(10000);
            }
 
-         close_camera();
+        close_dynamic_pages();
+
+        close_camera();
 
         AmmServer_Stop();
       }
