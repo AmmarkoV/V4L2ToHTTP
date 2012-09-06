@@ -2,7 +2,7 @@
 
 BINFOLDERPATH="."
 BINPATH="v4l2tohttp"
-PARAMS="0.0.0.0 8081 $@"
+PARAMS="$@"
 
 echo "starting $BINPATH with parameters $PARAMS"
 
