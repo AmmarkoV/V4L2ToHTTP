@@ -2,29 +2,31 @@
 
 BINFOLDERPATH="."
 BINPATH="v4l2tohttp"
+PARAMS="0.0.0.0 8081 $@"
 
+echo "starting $BINPATH with parameters $PARAMS"
 
 if [ -e /usr/lib/x86_64-linux-gnu/libv4l/v4l2convert.so ]
 then
-  LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH
+  LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH $PARAMS
   exit 0
 fi
 
 if [ -e /usr/lib/libv4l/v4l2convert.so ]
 then
-  LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH
+  LD_PRELOAD=/usr/lib/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH $PARAMS
   exit 0
 fi
 
 if [ -e /usr/lib32/libv4l/v4l2convert.so ]
 then
-  LD_PRELOAD=/usr/lib32/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH
+  LD_PRELOAD=/usr/lib32/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH $PARAMS
   exit 0
 fi
 
 if [ -e /usr/lib/i386-linux-gnu/libv4l/v4l2convert.so ]
 then
-  LD_PRELOAD=/usr/lib/i386-linux-gnu/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH
+  LD_PRELOAD=/usr/lib/i386-linux-gnu/libv4l/v4l2convert.so $BINFOLDERPATH/$BINPATH $PARAMS
   exit 0
 fi
  

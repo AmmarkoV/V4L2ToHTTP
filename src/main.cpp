@@ -102,7 +102,7 @@ void * prepare_index_page_callback()
   return 0;
 }
 
-int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
+int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigned int framerate)
 {
   if ( !InitVideoInputs(1) )
     {
@@ -118,7 +118,7 @@ int open_camera(unsigned int width,unsigned int height,unsigned int framerate)
   jpg_width=width;
   jpg_height=height;
 
-  if (! InitVideoFeed(0,webcam,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) )
+  if (! InitVideoFeed(0,webcam_dev,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) )
     {
       fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n");
       return 0;
@@ -234,15 +234,10 @@ int main(int argc, char *argv[])
     }
   if (argc>=3)
     {
-      strncpy(webserver_root,argv[3],MAX_FILE_PATH);
-    }
-  if (argc>=4)
-    {
-      strncpy(templates_root,argv[4],MAX_FILE_PATH);
+      strncpy(webcam,argv[3],MAX_FILE_PATH);
     }
 
-
-  if ( open_camera(640,480,60) )
+  if ( open_camera(webcam,640,480,60) )
     {
       //We were able to start camera so lets start everything else
 
