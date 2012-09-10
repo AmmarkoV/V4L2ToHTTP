@@ -241,7 +241,8 @@ int main(int argc, char *argv[])
     {
       //We were able to start camera so lets start everything else
 
-      AmmServer_Start(bindIP,port,webserver_root,templates_root);
+      AmmServer_Start(bindIP,port,0,webserver_root,templates_root);
+      AmmServer_SetIntSettingValue(AMMSET_PASSWORD_PROTECTION,1);
 
       init_dynamic_pages(); // Map index.html , cam.jpg to their content and callbacks
 
