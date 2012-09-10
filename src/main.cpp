@@ -243,6 +243,7 @@ int main(int argc, char *argv[])
 
       AmmServer_Start(bindIP,port,0,webserver_root,templates_root);
       AmmServer_SetIntSettingValue(AMMSET_PASSWORD_PROTECTION,1);
+      AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,"QWxhZGluOnNlc2FtIG9wZW4=");
 
       init_dynamic_pages(); // Map index.html , cam.jpg to their content and callbacks
 
