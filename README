@@ -1,1 +1,20 @@
-A Small application that uses my HTTP server and my VideoInput for V4L/V4L2 to directly stream webcam input to the internet via http.. 
+A Small server application that uses my HTTP server and VideoInput  for V4L/V4L2 back-ends  to directly stream webcam input to the internet via http.. 
+
+Compiling should be quite easy , just run ./make ( ./make not make , it is a bash script ) on the directory you downloaded..
+The script should automatically clone AmmarServer and VideoInput repos and compile everything together into an executable called v4l2tohttp
+
+If you only have one camera ( on /dev/video0 ) and you want to stream it to the default port 8081 just run ./Stream1Cam.sh
+For other setups just use ./run_v4l2_to_http 0.0.0.0 8081 /dev/video0 
+For now you have to start a new seperate process for each seperate webcam
+ 
+for example issuing
+ ./run_v4l2_to_http 0.0.0.0 8081 /dev/video0& 
+ ./run_v4l2_to_http 0.0.0.0 8082 /dev/video1&
+ ./run_v4l2_to_http 0.0.0.0 8083 /dev/video2& 
+will start transmitting 3 feeds on ports 8081-8083
+
+To stop the servers you can run ./killallinstances.sh 
+
+That's about it , password protection and other features are inside but I'll have to make a more user-friendly configuration interface in the future..
+ 
+Bug reports/issues/fixes  are very much accepted , you can use the github issues thingy ( https://github.com/AmmarkoV/V4L2ToHTTP/issues )
