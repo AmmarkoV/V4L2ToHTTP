@@ -44,8 +44,6 @@ char templates_root[MAX_FILE_PATH]="public_html/templates/";
 struct AmmServer_RH_Context index_page= {0};
 
 struct AmmServer_RH_Context jpeg_picture= {0};
-char * raw_jpeg_image=0;
-unsigned int raw_jpeg_image_size =0;
 unsigned int jpg_width=320,jpg_height=240;
 
 
@@ -126,14 +124,6 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
       return 0;
     }
 
-  raw_jpeg_image_size=jpg_width * jpg_height * 3;
-  raw_jpeg_image = (char *) malloc(sizeof(char) * raw_jpeg_image_size ); //Jpeg should be smaller than uncompressed RGB :P
-  if (raw_jpeg_image==0)
-    {
-      fprintf(stderr,"Could not allocate enough memory for jpg snap\n");
-      return 0;
-    }
-
   int MAX_waittime=10000;
   int waittime=0;
   while ( ( !FeedReceiveLoopAlive(0) )&& (waittime<MAX_waittime) )
@@ -152,8 +142,8 @@ void * prepare_camera_data_callback()
       return 0;
     }
   fprintf(stderr,"Calling Camera callback \n");
-  jpeg_picture.content_size=jpeg_picture.MAX_content_size;
-  RecordOneInMem((char*) "servedAtMem.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
+  jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
+  RecordOneInMem((char*) "servedAtMem_DummyFilename.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
   while (VideoSimulationState()!=LIVE_ON)
     {
       usleep(1);  // Wait until recording is complete..!
@@ -180,10 +170,9 @@ void init_dynamic_pages()
   AmmServer_AddResourceHandler(&index_page,(char *) "/index.html",webserver_root,4096,0,(void *) &prepare_index_page_callback);
 
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
-  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,0,0,(void *) &prepare_camera_data_callback);
-  jpeg_picture.content=raw_jpeg_image;
-  jpeg_picture.content_size=raw_jpeg_image_size;
-  jpeg_picture.MAX_content_size=raw_jpeg_image_size;
+  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3,0,(void *) &prepare_camera_data_callback);
+  jpeg_picture.content_size=jpg_width * jpg_height * 3;
+  jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
 
   prepare_camera_data_callback(); //Do a callback to populate content..!
 }
