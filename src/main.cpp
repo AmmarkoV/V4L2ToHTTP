@@ -44,6 +44,8 @@ char templates_root[MAX_FILE_PATH]="public_html/templates/";
 struct AmmServer_RH_Context index_page= {0};
 
 struct AmmServer_RH_Context jpeg_picture= {0};
+char * raw_jpeg_image=0;
+unsigned int raw_jpeg_image_size =0;
 unsigned int jpg_width=320,jpg_height=240;
 
 
@@ -124,10 +126,9 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
       return 0;
     }
 
-  jpeg_picture.content_size=jpg_width * jpg_height * 3;
-  jpeg_picture.MAX_content_size=jpeg_picture.content_size;
-  jpeg_picture.content = (char *) malloc(sizeof(char) * jpeg_picture.content_size ); //Jpeg should be smaller than uncompressed RGB :P
-  if (jpeg_picture.content==0)
+  raw_jpeg_image_size=jpg_width * jpg_height * 3;
+  raw_jpeg_image = (char *) malloc(sizeof(char) * raw_jpeg_image_size ); //Jpeg should be smaller than uncompressed RGB :P
+  if (raw_jpeg_image==0)
     {
       fprintf(stderr,"Could not allocate enough memory for jpg snap\n");
       return 0;
@@ -175,19 +176,14 @@ int close_camera()
 
 void init_dynamic_pages()
 {
-
-  memset(&index_page,0,sizeof(struct AmmServer_RH_Context));
-  index_page.content  = (char * ) malloc(sizeof(char) * 4096);
-  strncpy(index_page.web_root_path,webserver_root,MAX_FILE_PATH);
-  strncpy(index_page.resource_name,"/index.html",MAX_RESOURCE);
-  index_page.prepare_content_callback=(void*) &prepare_index_page_callback;
-  AmmServer_AddResourceHandler(&index_page); //webserver_root,(char *) "/index.html",index_page_mem,&index_page_size,(void *) &prepare_index_page_callback);
+  //int AmmServer_AddResourceHandler(struct AmmServer_RH_Context * context, char * resource_name , char * web_root, unsigned int allocate_mem_bytes,unsigned int callback_every_x_msec,void * callback);
+  AmmServer_AddResourceHandler(&index_page,(char *) "/index.html",webserver_root,4096,0,(void *) &prepare_index_page_callback);
 
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
-  strncpy(jpeg_picture.web_root_path,webserver_root,MAX_FILE_PATH);
-  strncpy(jpeg_picture.resource_name,"/cam.jpg",MAX_RESOURCE);
-  jpeg_picture.prepare_content_callback=(void*) &prepare_camera_data_callback;
-  AmmServer_AddResourceHandler(&jpeg_picture); //webserver_root,(char *) "/cam.jpg",jpg_snap_mem,&jpg_snap_size,(void *) &prepare_camera_data_callback);
+  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,0,0,(void *) &prepare_camera_data_callback);
+  jpeg_picture.content=raw_jpeg_image;
+  jpeg_picture.content_size=raw_jpeg_image_size;
+  jpeg_picture.MAX_content_size=raw_jpeg_image_size;
 
   prepare_camera_data_callback(); //Do a callback to populate content..!
 }
@@ -244,8 +240,8 @@ int main(int argc, char *argv[])
       AmmServer_Start(bindIP,port,0,webserver_root,templates_root);
 
 
-     AmmServer_SetStrSettingValue(AMMSET_USERNAME_STR,"admin");
-     AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,"ammar"); //these 2 calls should change BASE64PASSWORD to YWRtaW46YW1tYXI= in
+     AmmServer_SetStrSettingValue(AMMSET_USERNAME_STR,(char*) "admin");
+     AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,(char*) "ammar"); //these 2 calls should change BASE64PASSWORD to YWRtaW46YW1tYXI= in
     /* It is best to enable password protection after correctly setting both username and password
        to avoid the rare race condition of logging only with username ( i.e. when password hasn't been declared */
      AmmServer_SetIntSettingValue(AMMSET_PASSWORD_PROTECTION,1);
