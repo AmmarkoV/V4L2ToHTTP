@@ -1,0 +1,18 @@
+#!/bin/bash
+echo "This script is supposed to download all dependencies , for building RoboVision ( guarddog ) "
+echo "This script supposes a Debian/Ubuntu distro with apt-get as a package manager!"
+
+echo
+echo -n "                Do you want to proceed (Y/N)?"
+read answer
+if test "$answer" != "Y" -a "$answer" != "y";
+then exit 0;
+fi
+
+echo "Starting downloads "
+echo "What is basically needed is GCC and libs , WxWidgets ( for some VideoInput samples )  , LibV4L development headers , PNG and JPEG support  "
+
+
+sudo apt-get install build-essential libv4l-dev libv4lconvert0 wx-common g++ libwxgtk2.8-0 libwxgtk2.8-dev imagemagick libpng12-dev libjpeg-dev
+ 
+exit 0
