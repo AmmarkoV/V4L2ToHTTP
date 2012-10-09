@@ -47,7 +47,7 @@ struct AmmServer_RH_Context jpeg_picture= {0};
 unsigned int jpg_width=320,jpg_height=240;
 
 
-void * prepare_index_page_callback()
+void * prepare_index_page_callback(unsigned int ignored_associated_vars)
 {
   if (SIMPLE_INDEX)
     {
@@ -134,7 +134,7 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
   return 1;
 }
 
-void * prepare_camera_data_callback()
+void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
 {
   if (VideoSimulationState()!=LIVE_ON)
     {
@@ -174,7 +174,7 @@ void init_dynamic_pages()
   jpeg_picture.content_size=jpg_width * jpg_height * 3;
   jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
 
-  prepare_camera_data_callback(); //Do a callback to populate content..!
+  prepare_camera_data_callback(0); //Do a callback to populate content..!
 }
 
 void close_dynamic_pages()
