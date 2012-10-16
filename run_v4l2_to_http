@@ -34,5 +34,16 @@ echo "Oh no.. they must have changed filenames again .. or you are running this 
 echo "That`s why this script failed running $BINPATH in v4l2 compatibility mode"
 echo "please try using *find -n v4l2convert.so* and update this compatibility script..!"
 
+CUSTOM_PLACE=`sudo find / -name v4l2convert.so  | grep v4l2convert`
+
+if [ -e $CUSTOM_PLACE ]
+then
+  LD_PRELOAD=$CUSTOM_PLACE $BINFOLDERPATH/$BINPATH $PARAMS
+  exit 0
+fi
+ 
+
+
+find /
 
 exit 0
