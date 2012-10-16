@@ -30,20 +30,15 @@ then
   exit 0
 fi
  
-echo "Oh no.. they must have changed filenames again .. or you are running this script in an untested distro"
-echo "That`s why this script failed running $BINPATH in v4l2 compatibility mode"
-echo "please try using *find -n v4l2convert.so* and update this compatibility script..!"
+echo "Oh no.. they must have changed filenames again .. or you are running this script in an untested distro" 
+echo "Trying one last trick to find v4l2convert.so.. Please also make sure you run the apt-get-dependencies script..!" 
 
 CUSTOM_PLACE=`sudo find / -name v4l2convert.so  | grep v4l2convert`
 
-if [ -e $CUSTOM_PLACE ]
+if [ -e "$CUSTOM_PLACE" ]
 then
   LD_PRELOAD=$CUSTOM_PLACE $BINFOLDERPATH/$BINPATH $PARAMS
   exit 0
 fi
- 
-
-
-find /
 
 exit 0
