@@ -34,6 +34,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <linux/videodev2.h>
 
 #define SIMPLE_INDEX 0
+#define ENABLE_PASSWORD_PROTECTION 0
 
 char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
@@ -170,7 +171,8 @@ void init_dynamic_pages()
   AmmServer_AddResourceHandler(&index_page,(char *) "/index.html",webserver_root,4096,0,(void *) &prepare_index_page_callback);
 
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
-  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3,0,(void *) &prepare_camera_data_callback);
+
+  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 500 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback);
   jpeg_picture.content_size=jpg_width * jpg_height * 3;
   jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
 
@@ -228,12 +230,14 @@ int main(int argc, char *argv[])
 
       AmmServer_Start(bindIP,port,0,webserver_root,templates_root);
 
-
+  if (ENABLE_PASSWORD_PROTECTION)
+   {
      AmmServer_SetStrSettingValue(AMMSET_USERNAME_STR,(char*) "admin");
      AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,(char*) "ammar"); //these 2 calls should change BASE64PASSWORD to YWRtaW46YW1tYXI= in
     /* It is best to enable password protection after correctly setting both username and password
        to avoid the rare race condition of logging only with username ( i.e. when password hasn't been declared */
      AmmServer_SetIntSettingValue(AMMSET_PASSWORD_PROTECTION,1);
+   }
 
       init_dynamic_pages(); // Map index.html , cam.jpg to their content and callbacks
 
