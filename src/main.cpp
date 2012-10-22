@@ -34,7 +34,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <linux/videodev2.h>
 
 #define SIMPLE_INDEX 0
-#define ENABLE_PASSWORD_PROTECTION 0
+#define ENABLE_PASSWORD_PROTECTION 1
 
 char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
   if (ENABLE_PASSWORD_PROTECTION)
    {
      AmmServer_SetStrSettingValue(AMMSET_USERNAME_STR,(char*) "admin");
-     AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,(char*) "ammar"); //these 2 calls should change BASE64PASSWORD to YWRtaW46YW1tYXI= in
+     AmmServer_SetStrSettingValue(AMMSET_PASSWORD_STR,(char*) "admin"); //these 2 calls should change BASE64PASSWORD to the proper hex value
     /* It is best to enable password protection after correctly setting both username and password
        to avoid the rare race condition of logging only with username ( i.e. when password hasn't been declared */
      AmmServer_SetIntSettingValue(AMMSET_PASSWORD_PROTECTION,1);
