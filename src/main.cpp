@@ -34,7 +34,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <linux/videodev2.h>
 
 #define SIMPLE_INDEX 0
+//-----------------------------------
+#define VIDEO_WIDTH 640
+#define VIDEO_HEIGHT 320
+#define FRAMERATE 60
 #define ENABLE_PASSWORD_PROTECTION 1
+//-----------------------------------
 
 char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
@@ -45,7 +50,7 @@ char templates_root[MAX_FILE_PATH]="public_html/templates/";
 struct AmmServer_RH_Context index_page= {0};
 
 struct AmmServer_RH_Context jpeg_picture= {0};
-unsigned int jpg_width=320,jpg_height=240;
+unsigned int jpg_width=VIDEO_WIDTH,jpg_height=VIDEO_HEIGHT;
 
 
 void * prepare_index_page_callback(unsigned int ignored_associated_vars)
@@ -172,11 +177,17 @@ void init_dynamic_pages()
 
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
 
-  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 500 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback);
+  AmmServer_AddResourceHandler(&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 250 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback);
   jpeg_picture.content_size=jpg_width * jpg_height * 3;
   jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
 
   prepare_camera_data_callback(0); //Do a callback to populate content..!
+
+
+  char image_path[MAX_FILE_PATH]={0};
+     strcpy(image_path,webserver_root);
+     strcat(image_path,"cam.jpg"); //public_html/cam.jp
+  AmmServer_DoNOTCacheResource(image_path); // This jpg image will be changing all the time , so we don't want to cache it..!
 }
 
 void close_dynamic_pages()
@@ -224,7 +235,7 @@ int main(int argc, char *argv[])
       strncpy(webcam,argv[3],MAX_FILE_PATH);
     }
 
-  if ( open_camera(webcam,640,480,60) )
+  if ( open_camera(webcam,VIDEO_WIDTH,VIDEO_HEIGHT,FRAMERATE) )
     {
       //We were able to start camera so lets start everything else
 
