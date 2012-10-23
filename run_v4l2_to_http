@@ -30,10 +30,10 @@ then
   exit 0
 fi
  
-echo "Oh no.. they must have changed filenames again .. or you are running this script in an untested distro" 
-echo "Trying one last trick to find v4l2convert.so.. Please also make sure you run the apt-get-dependencies script..!" 
+echo "Oh no.. they must have changed filenames again .. or you are running this script in an untested distro.." 
+echo "Trying one last trick to preload v4l2convert.so.. Please also make sure you run the apt-get-dependencies script..!" 
 
-CUSTOM_PLACE=`sudo find / -name v4l2convert.so  | grep v4l2convert`
+CUSTOM_PLACE=`sudo find /usr -name v4l2convert.so  | grep v4l2convert`
 
 if [ -e "$CUSTOM_PLACE" ]
 then

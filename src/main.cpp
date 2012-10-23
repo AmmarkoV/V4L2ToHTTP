@@ -36,8 +36,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define SIMPLE_INDEX 0
 //-----------------------------------
 #define VIDEO_WIDTH 640
-#define VIDEO_HEIGHT 320
-#define FRAMERATE 60
+#define VIDEO_HEIGHT 480
+#define FRAMERATE 25
 #define ENABLE_PASSWORD_PROTECTION 1
 //-----------------------------------
 
