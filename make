@@ -54,7 +54,7 @@ fi
 
 CFLAGS="-s " 
 OURLIBRARIES="AmmarServer/src/AmmServerlib/libAmmServerlib.a VideoInput/libVideoInput.a" 
-LIBRARIES="-pthread -lpng -ljpeg -lrt"
+LIBRARIES="-pthread -lpng -ljpeg -lrt -lz"
 
 g++  src/main.cpp -L. $OURLIBRARIES $LIBRARIES -o $OUTPUT
 
