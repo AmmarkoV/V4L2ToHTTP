@@ -183,11 +183,7 @@ void init_dynamic_pages()
 
   prepare_camera_data_callback(0); //Do a callback to populate content..!
 
-
-  char image_path[MAX_FILE_PATH]={0};
-     strcpy(image_path,webserver_root);
-     strcat(image_path,"cam.jpg"); //public_html/cam.jp
-  AmmServer_DoNOTCacheResource(image_path); // This jpg image will be changing all the time , so we don't want to cache it..!
+  AmmServer_DoNOTCacheResourceHandler(&jpeg_picture);  // Cam.jpg will be constantly changing , do not send 304 NOT MODIFIED
 }
 
 void close_dynamic_pages()

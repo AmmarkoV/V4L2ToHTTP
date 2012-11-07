@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
-		<Project filename="VideoInput/VideoInput.cbp" />
 		<Project filename="AmmarServer/src/AmmServerlib/AmmServerlib.cbp" active="1" />
+		<Project filename="VideoInput/VideoInput.cbp" />
 		<Project filename="src/V4L2ToHTTP.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
