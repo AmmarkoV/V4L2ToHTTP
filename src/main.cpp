@@ -141,7 +141,7 @@ void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
 
 int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigned int framerate)
 {
-  if ( !InitVideoInputs(1) )
+  if ( !VideoInput_InitializeLibrary(1) )
     {
       fprintf(stderr,"Could not open Video Input\n");
       return 0;
@@ -155,7 +155,7 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
   jpg_width=width;
   jpg_height=height;
 
-  if (! InitVideoFeed(0,webcam_dev,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) )
+  if (! VideoInput_OpenFeed(0,webcam_dev,jpg_width,jpg_height,BITRATE,framerate,1,feedsettings) )
     {
       fprintf(stderr,"Could not set Video feed settings consider running with v4l2convert.so preloaded\n");
       return 0;
@@ -163,7 +163,7 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
 
   int MAX_waittime=10000;
   int waittime=0;
-  while ( ( !FeedReceiveLoopAlive(0) )&& (waittime<MAX_waittime) )
+  while ( ( !VideoInput_FeedReceiveLoopAlive(0) )&& (waittime<MAX_waittime) )
     {
       ++waittime;
     }
@@ -178,7 +178,7 @@ int close_camera()
       free(jpeg_picture.content);
       jpeg_picture.content=0;
     }
-  CloseVideoInputs();
+  VideoInput_DeinitializeLibrary();
   return 1;
 }
 
