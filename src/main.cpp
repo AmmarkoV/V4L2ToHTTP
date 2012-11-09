@@ -123,14 +123,10 @@ void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
 
   fprintf(stderr,"Calling Camera callback \n");
   jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
-  RecordOneInMem((char*) "servedAtMem_DummyFilename.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
-  while (VideoSimulationState()!=LIVE_ON)
-    {
-      usleep(1);  // Wait until recording is complete..!
-    }
+  VideoInput_SaveFrameJPEGMemory(0,jpeg_picture.content,&jpeg_picture.content_size);
 
 
-   pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
+  pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
 
 
   fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
