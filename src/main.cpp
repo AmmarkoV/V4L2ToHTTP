@@ -23,6 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "../AmmarServer/src/AmmServerlib/AmmServerlib.h"
 
 #define MAX_BINDING_PORT 65534
@@ -45,7 +46,7 @@ char webcam[MAX_FILE_PATH]="/dev/video0";
 char webserver_root[MAX_FILE_PATH]="public_html/";
 char templates_root[MAX_FILE_PATH]="public_html/templates/";
 
-
+pthread_mutex_t refresh_jpeg_lock;
 
 struct AmmServer_RH_Context index_page= {0};
 
@@ -65,6 +66,7 @@ void * prepare_index_page_callback(unsigned int ignored_associated_vars)
       strcat(index_page.content,"    <head>\n");
       strcat(index_page.content,"         <title>V4L2ToHTTP</title>\n");
       strcat(index_page.content,"         <script language=\"JavaScript\"><!--\n");
+      strcat(index_page.content,"                var refreshDelayMilliSecs = 550;\n");
       strcat(index_page.content,"                var newImage = new Image();\n");
       strcat(index_page.content,"                var number = 0;\n");
       strcat(index_page.content,"                newImage.src = \"cam.jpg?i=0\";\n");
@@ -80,11 +82,11 @@ void * prepare_index_page_callback(unsigned int ignored_associated_vars)
       strcat(index_page.content,"                                      number++;\n");
       strcat(index_page.content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
       strcat(index_page.content,"                                   }\n");
-      strcat(index_page.content,"                        }\n                     setTimeout('updateImage()',550);\n");
+      strcat(index_page.content,"                        }\n                     setTimeout('updateImage()',refreshDelayMilliSecs);\n");
       strcat(index_page.content,"                   }\n");
       strcat(index_page.content,"               //--></script>\n");
       strcat(index_page.content,"</head>\n");
-      strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',550)\">\n");
+      strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',refreshDelayMilliSecs)\">\n");
       strcat(index_page.content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
       strcat(index_page.content,"<h5>Active Clients : ");
 
@@ -107,6 +109,35 @@ void * prepare_index_page_callback(unsigned int ignored_associated_vars)
   index_page.content_size=index_page.MAX_content_size;
   return 0;
 }
+
+
+void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
+{
+  if (VideoSimulationState()!=LIVE_ON)
+    {
+      fprintf(stderr,"Camera already snapping\n");
+      return 0;
+    }
+
+  pthread_mutex_lock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
+
+  fprintf(stderr,"Calling Camera callback \n");
+  jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
+  RecordOneInMem((char*) "servedAtMem_DummyFilename.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
+  while (VideoSimulationState()!=LIVE_ON)
+    {
+      usleep(1);  // Wait until recording is complete..!
+    }
+
+
+   pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
+
+
+  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
+  return 0;
+}
+
+
 
 int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigned int framerate)
 {
@@ -138,25 +169,6 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
     }
 
   return 1;
-}
-
-void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
-{
-  if (VideoSimulationState()!=LIVE_ON)
-    {
-      fprintf(stderr,"Camera already snapping\n");
-      return 0;
-    }
-  fprintf(stderr,"Calling Camera callback \n");
-  jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
-  RecordOneInMem((char*) "servedAtMem_DummyFilename.jpg",0,1,jpeg_picture.content,&jpeg_picture.content_size);
-  while (VideoSimulationState()!=LIVE_ON)
-    {
-      usleep(1);  // Wait until recording is complete..!
-    }
-
-  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
-  return 0;
 }
 
 int close_camera()
