@@ -40,6 +40,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define VIDEO_WIDTH 640
 #define VIDEO_HEIGHT 480
 #define FRAMERATE 25
+#define WEB_PAGE_UPDATE_EVERY_MS 700
 #define ENABLE_PASSWORD_PROTECTION 1
 //-----------------------------------
 
@@ -69,7 +70,13 @@ void * prepare_index_page_callback(unsigned int ignored_associated_vars)
       strcat(index_page.content,"    <head>\n");
       strcat(index_page.content,"         <title>V4L2ToHTTP</title>\n");
       strcat(index_page.content,"         <script language=\"JavaScript\"><!--\n");
-      strcat(index_page.content,"                var refreshDelayMilliSecs = 550;\n");
+
+      strcat(index_page.content,"                var refreshDelayMilliSecs = ");
+
+      char webupstr[128]={0};
+      sprintf(webupstr,"%u\n",WEB_PAGE_UPDATE_EVERY_MS);
+      strcat(index_page.content,webupstr);
+
       strcat(index_page.content,"                var newImage = new Image();\n");
       strcat(index_page.content,"                var number = 0;\n");
       strcat(index_page.content,"                newImage.src = \"cam.jpg?i=0\";\n");
@@ -118,7 +125,8 @@ void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
 {
   if (VideoSimulationState()!=LIVE_ON)
     {
-      fprintf(stderr,"Camera already snapping\n");
+      fprintf(stderr,"Warning : Camera already snapping\n");
+      jpeg_picture.content_size=0;
       return 0;
     }
 
@@ -126,13 +134,15 @@ void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
 
   fprintf(stderr,"Calling Camera callback \n");
   jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
-  VideoInput_SaveFrameJPEGMemory(0,jpeg_picture.content,&jpeg_picture.content_size);
 
+  unsigned long jpeg_size_refreshed=0;
+  VideoInput_SaveFrameJPEGMemory( 0 , jpeg_picture.content , &jpeg_size_refreshed);
+
+
+  jpeg_picture.content_size  =  jpeg_size_refreshed;
+  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
 
   pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
-
-
-  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
   return 0;
 }
 
