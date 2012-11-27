@@ -2,7 +2,7 @@
 <CodeBlocks_workspace_file>
 	<Workspace title="Workspace">
 		<Project filename="AmmarServer/src/AmmServerlib/AmmServerlib.cbp" />
-		<Project filename="VideoInput/VideoInput.cbp" />
-		<Project filename="src/V4L2ToHTTP.cbp" active="1" />
+		<Project filename="VideoInput/VideoInput.cbp" active="1" />
+		<Project filename="src/V4L2ToHTTP.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>
