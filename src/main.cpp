@@ -40,7 +40,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #define VIDEO_WIDTH 640
 #define VIDEO_HEIGHT 480
 #define FRAMERATE 25
-#define WEB_PAGE_UPDATE_EVERY_MS 700
+#define WEB_PAGE_UPDATE_EVERY_MS 1000
 #define ENABLE_PASSWORD_PROTECTION 1
 //-----------------------------------
 
@@ -58,70 +58,70 @@ struct AmmServer_RH_Context jpeg_picture= {0};
 unsigned int jpg_width=VIDEO_WIDTH,jpg_height=VIDEO_HEIGHT;
 
 
-void * prepare_index_page_callback(unsigned int ignored_associated_vars)
+void * prepare_index_page_callback(char * content)
 {
   if (SIMPLE_INDEX)
     {
-      strcpy(index_page.content,"<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><center><img src=\"cam.jpg\"><br><h3><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>");
+      strcpy(content,"<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><center><img src=\"cam.jpg\"><br><h3><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>");
     }
   else
     {
-      strcpy(index_page.content,"<html>\n");
-      strcat(index_page.content,"    <head>\n");
-      strcat(index_page.content,"         <title>V4L2ToHTTP</title>\n");
-      strcat(index_page.content,"         <script language=\"JavaScript\"><!--\n");
+      strcpy(content,"<html>\n");
+      strcat(content,"    <head>\n");
+      strcat(content,"         <title>V4L2ToHTTP</title>\n");
+      strcat(content,"         <script language=\"JavaScript\"><!--\n");
 
-      strcat(index_page.content,"                var refreshDelayMilliSecs = ");
+      strcat(content,"                var refreshDelayMilliSecs = ");
 
       char webupstr[128]={0};
       sprintf(webupstr,"%u\n",WEB_PAGE_UPDATE_EVERY_MS);
-      strcat(index_page.content,webupstr);
+      strcat(content,webupstr);
 
-      strcat(index_page.content,"                var newImage = new Image();\n");
-      strcat(index_page.content,"                var number = 0;\n");
-      strcat(index_page.content,"                newImage.src = \"cam.jpg?i=0\";\n");
-      strcat(index_page.content,"                 function updateImage()\n");
-      strcat(index_page.content,"                    {\n");
-      strcat(index_page.content,"                           if(newImage.complete)\n");
-      strcat(index_page.content,"                           {\n");
-      strcat(index_page.content,"                                document.getElementById(\"LiveImage\").src = newImage.src;\n");
-      strcat(index_page.content,"                                if(newImage.complete)\n");
-      strcat(index_page.content,"                                 {\n");
-      strcat(index_page.content,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
-      strcat(index_page.content,"                                      newImage = new Image();\n");
-      strcat(index_page.content,"                                      number++;\n");
-      strcat(index_page.content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
-      strcat(index_page.content,"                                   }\n");
-      strcat(index_page.content,"                        }\n                     setTimeout('updateImage()',refreshDelayMilliSecs);\n");
-      strcat(index_page.content,"                   }\n");
-      strcat(index_page.content,"               //--></script>\n");
-      strcat(index_page.content,"</head>\n");
-      strcat(index_page.content,"<body  onLoad=\"setTimeout('updateImage()',refreshDelayMilliSecs)\">\n");
-      strcat(index_page.content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
-      strcat(index_page.content,"<h5>Active Clients : ");
+      strcat(content,"                var newImage = new Image();\n");
+      strcat(content,"                var number = 0;\n");
+      strcat(content,"                newImage.src = \"cam.jpg?i=0\";\n");
+      strcat(content,"                 function updateImage()\n");
+      strcat(content,"                    {\n");
+      strcat(content,"                           if(newImage.complete)\n");
+      strcat(content,"                           {\n");
+      strcat(content,"                                document.getElementById(\"LiveImage\").src = newImage.src;\n");
+      strcat(content,"                                if(newImage.complete)\n");
+      strcat(content,"                                 {\n");
+      strcat(content,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
+      strcat(content,"                                      newImage = new Image();\n");
+      strcat(content,"                                      number++;\n");
+      strcat(content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
+      strcat(content,"                                   }\n");
+      strcat(content,"                        }\n                     setTimeout('updateImage()',refreshDelayMilliSecs);\n");
+      strcat(content,"                   }\n");
+      strcat(content,"               //--></script>\n");
+      strcat(content,"</head>\n");
+      strcat(content,"<body  onLoad=\"setTimeout('updateImage()',refreshDelayMilliSecs)\">\n");
+      strcat(content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
+      strcat(content,"<h5>Active Clients : ");
 
       if (AmmServer_GetInfo(v4l2_server,AMMINF_ACTIVE_CLIENTS) < 10000 )
            {
              char viewers_str[150]={0};
              sprintf(viewers_str,"%u",AmmServer_GetInfo(v4l2_server,AMMINF_ACTIVE_CLIENTS));
-             strcat(index_page.content,viewers_str);
+             strcat(content,viewers_str);
            } else
            {
-               strcat(index_page.content,"N/A");
+               strcat(content,"N/A");
            }
 
-      strcat(index_page.content,"<br>\n");
-      strcat(index_page.content,"<br><a href=\"index.html\">-- Manually Reload Page --</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n");
-      strcat(index_page.content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
+      strcat(content,"<br>\n");
+      strcat(content,"<br><a href=\"index.html\">-- Manually Reload Page --</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n");
+      strcat(content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
     }
 
-  index_page.MAX_content_size=strlen((char *)index_page.content);
+  index_page.MAX_content_size=strlen((char *)content);
   index_page.content_size=index_page.MAX_content_size;
   return 0;
 }
 
 
-void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
+void * prepare_camera_data_callback(char * content)
 {
   if (VideoSimulationState()!=LIVE_ON)
     {
@@ -136,7 +136,7 @@ void * prepare_camera_data_callback(unsigned int ignored_associated_vars)
   jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
 
   unsigned long jpeg_size_refreshed=0;
-  VideoInput_SaveFrameJPEGMemory( 0 , jpeg_picture.content , &jpeg_size_refreshed);
+  VideoInput_SaveFrameJPEGMemory( 0 , content , &jpeg_size_refreshed);
 
 
   jpeg_picture.content_size  =  jpeg_size_refreshed;
