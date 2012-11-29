@@ -194,11 +194,11 @@ int close_camera()
 void init_dynamic_pages()
 {
   //int AmmServer_AddResourceHandler(struct AmmServer_RH_Context * context, char * resource_name , char * web_root, unsigned int allocate_mem_bytes,unsigned int callback_every_x_msec,void * callback);
-  AmmServer_AddResourceHandler(v4l2_server,&index_page,(char *) "/index.html",webserver_root,4096,0,(void *) &prepare_index_page_callback);
+  AmmServer_AddResourceHandler(v4l2_server,&index_page,(char *) "/index.html",webserver_root,4096,0,(void *) &prepare_index_page_callback,SAME_PAGE_FOR_ALL_CLIENTS);
 
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
 
-  AmmServer_AddResourceHandler(v4l2_server,&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 250 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback);
+  AmmServer_AddResourceHandler(v4l2_server,&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 250 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback,DIFFERENT_PAGE_FOR_EACH_CLIENT);
   jpeg_picture.content_size=jpg_width * jpg_height * 3;
   jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
 
