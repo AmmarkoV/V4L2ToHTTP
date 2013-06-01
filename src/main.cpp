@@ -58,89 +58,89 @@ struct AmmServer_RH_Context jpeg_picture= {0};
 unsigned int jpg_width=VIDEO_WIDTH,jpg_height=VIDEO_HEIGHT;
 
 
-void * prepare_index_page_callback(char * content)
+void * prepare_index_page_callback(struct AmmServer_DynamicRequestContext * rqst)
 {
   if (SIMPLE_INDEX)
     {
-      strcpy(content,"<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><center><img src=\"cam.jpg\"><br><h3><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>");
+      strcpy(rqst->content,"<html><head><meta http-equiv=\"refresh\" content=\"1\"><title>V4L2ToHTTP</title></head><body><br><br><center><img src=\"cam.jpg\"><br><h3><a href=\"index.html\">-- Manually Reload Page --</a></h3></center></body></html>");
     }
   else
     {
-      strcpy(content,"<html>\n");
-      strcat(content,"    <head>\n");
-      strcat(content,"         <title>V4L2ToHTTP</title>\n");
-      strcat(content,"         <script language=\"JavaScript\"><!--\n");
+      strcpy(rqst->content,"<html>\n");
+      strcat(rqst->content,"    <head>\n");
+      strcat(rqst->content,"         <title>V4L2ToHTTP</title>\n");
+      strcat(rqst->content,"         <script language=\"JavaScript\"><!--\n");
 
-      strcat(content,"                var refreshDelayMilliSecs = ");
+      strcat(rqst->content,"                var refreshDelayMilliSecs = ");
 
       char webupstr[128]={0};
       sprintf(webupstr,"%u\n",WEB_PAGE_UPDATE_EVERY_MS);
-      strcat(content,webupstr);
+      strcat(rqst->content,webupstr);
 
-      strcat(content,"                var newImage = new Image();\n");
-      strcat(content,"                var number = 0;\n");
-      strcat(content,"                newImage.src = \"cam.jpg?i=0\";\n");
-      strcat(content,"                 function updateImage()\n");
-      strcat(content,"                    {\n");
-      strcat(content,"                           if(newImage.complete)\n");
-      strcat(content,"                           {\n");
-      strcat(content,"                                document.getElementById(\"LiveImage\").src = newImage.src;\n");
-      strcat(content,"                                if(newImage.complete)\n");
-      strcat(content,"                                 {\n");
-      strcat(content,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
-      strcat(content,"                                      newImage = new Image();\n");
-      strcat(content,"                                      number++;\n");
-      strcat(content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
-      strcat(content,"                                   }\n");
-      strcat(content,"                        }\n                     setTimeout('updateImage()',refreshDelayMilliSecs);\n");
-      strcat(content,"                   }\n");
-      strcat(content,"               //--></script>\n");
-      strcat(content,"</head>\n");
-      strcat(content,"<body  onLoad=\"setTimeout('updateImage()',refreshDelayMilliSecs)\">\n");
-      strcat(content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
-      strcat(content,"<h5>Active Clients : ");
+      strcat(rqst->content,"                var newImage = new Image();\n");
+      strcat(rqst->content,"                var number = 0;\n");
+      strcat(rqst->content,"                newImage.src = \"cam.jpg?i=0\";\n");
+      strcat(rqst->content,"                 function updateImage()\n");
+      strcat(rqst->content,"                    {\n");
+      strcat(rqst->content,"                           if(newImage.complete)\n");
+      strcat(rqst->content,"                           {\n");
+      strcat(rqst->content,"                                document.getElementById(\"LiveImage\").src = newImage.src;\n");
+      strcat(rqst->content,"                                if(newImage.complete)\n");
+      strcat(rqst->content,"                                 {\n");
+      strcat(rqst->content,"                                      document.getElementById(\"LiveImage\").src = newImage.src;\n");
+      strcat(rqst->content,"                                      newImage = new Image();\n");
+      strcat(rqst->content,"                                      number++;\n");
+      strcat(rqst->content,"                                     newImage.src = \"cam.jpg?i=\"+number\n"); //Later on make it cam.jpg?inc=\" + number;
+      strcat(rqst->content,"                                   }\n");
+      strcat(rqst->content,"                        }\n                     setTimeout('updateImage()',refreshDelayMilliSecs);\n");
+      strcat(rqst->content,"                   }\n");
+      strcat(rqst->content,"               //--></script>\n");
+      strcat(rqst->content,"</head>\n");
+      strcat(rqst->content,"<body  onLoad=\"setTimeout('updateImage()',refreshDelayMilliSecs)\">\n");
+      strcat(rqst->content,"<br><br><center><img src=\"cam.jpg?i=0\" id=\"LiveImage\"><br>");
+      strcat(rqst->content,"<h5>Active Clients : ");
 
       if (AmmServer_GetInfo(v4l2_server,AMMINF_ACTIVE_CLIENTS) < 10000 )
            {
              char viewers_str[150]={0};
              sprintf(viewers_str,"%u",AmmServer_GetInfo(v4l2_server,AMMINF_ACTIVE_CLIENTS));
-             strcat(content,viewers_str);
+             strcat(rqst->content,viewers_str);
            } else
            {
-               strcat(content,"N/A");
+               strcat(rqst->content,"N/A");
            }
 
-      strcat(content,"<br>\n");
-      strcat(content,"<br><a href=\"index.html\">-- Manually Reload Page --</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n");
-      strcat(content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
+      strcat(rqst->content,"<br>\n");
+      strcat(rqst->content,"<br><a href=\"index.html\">-- Manually Reload Page --</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n");
+      strcat(rqst->content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
     }
 
-  index_page.MAX_content_size=strlen((char *)content);
-  index_page.content_size=index_page.MAX_content_size;
+  rqst->MAX_content_size=strlen((char *)rqst->content);
+  rqst->content_size=rqst->MAX_content_size;
   return 0;
 }
 
 
-void * prepare_camera_data_callback(char * content)
+void * prepare_camera_data_callback(struct AmmServer_DynamicRequestContext * rqst)
 {
   if (VideoSimulationState()!=LIVE_ON)
     {
       fprintf(stderr,"Warning : Camera already snapping\n");
-      jpeg_picture.content_size=0;
+      rqst->content_size=0;
       return 0;
     }
 
   pthread_mutex_lock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
 
   fprintf(stderr,"Calling Camera callback \n");
-  jpeg_picture.content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
+  rqst->content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
 
   unsigned long jpeg_size_refreshed=0;
-  VideoInput_SaveFrameJPEGMemory( 0 , content , &jpeg_size_refreshed);
+  VideoInput_SaveFrameJPEGMemory( 0 , rqst->content , &jpeg_size_refreshed);
 
 
-  jpeg_picture.content_size  =  jpeg_size_refreshed;
-  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) jpeg_picture.content_size);
+  rqst->content_size  =  jpeg_size_refreshed;
+  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) rqst->content_size);
 
   pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
   return 0;
@@ -182,10 +182,10 @@ int open_camera(char * webcam_dev,unsigned int width,unsigned int height,unsigne
 
 int close_camera()
 {
-  if (jpeg_picture.content!=0)
+  if (jpeg_picture.requestContext.content!=0)
     {
-      free(jpeg_picture.content);
-      jpeg_picture.content=0;
+      free(jpeg_picture.requestContext.content);
+      jpeg_picture.requestContext.content=0;
     }
   VideoInput_DeinitializeLibrary();
   return 1;
@@ -199,8 +199,8 @@ void init_dynamic_pages()
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
 
   AmmServer_AddResourceHandler(v4l2_server,&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 250 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback,DIFFERENT_PAGE_FOR_EACH_CLIENT);
-  jpeg_picture.content_size=jpg_width * jpg_height * 3;
-  jpeg_picture.MAX_content_size=jpg_width * jpg_height * 3;
+  jpeg_picture.requestContext.content_size=jpg_width * jpg_height * 3;
+  jpeg_picture.requestContext.MAX_content_size=jpg_width * jpg_height * 3;
 
   prepare_camera_data_callback(0); //Do a callback to populate content..!
 
