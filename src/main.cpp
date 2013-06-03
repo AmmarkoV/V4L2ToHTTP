@@ -58,7 +58,7 @@ struct AmmServer_RH_Context jpeg_picture= {0};
 unsigned int jpg_width=VIDEO_WIDTH,jpg_height=VIDEO_HEIGHT;
 
 
-void * prepare_index_page_callback(struct AmmServer_DynamicRequestContext * rqst)
+void * prepare_index_page_callback(struct AmmServer_DynamicRequest * rqst)
 {
   if (SIMPLE_INDEX)
     {
@@ -115,32 +115,32 @@ void * prepare_index_page_callback(struct AmmServer_DynamicRequestContext * rqst
       strcat(rqst->content,"<a href=\"https://github.com/AmmarkoV/V4L2ToHTTP\">-- Get V4L2ToHTTP --</a></h5></center></body></html>\n");
     }
 
-  rqst->MAX_content_size=strlen((char *)rqst->content);
-  rqst->content_size=rqst->MAX_content_size;
+  rqst->MAXcontentSize=strlen((char *)rqst->content);
+  rqst->contentSize=rqst->MAXcontentSize;
   return 0;
 }
 
 
-void * prepare_camera_data_callback(struct AmmServer_DynamicRequestContext * rqst)
+void * prepare_camera_data_callback(struct AmmServer_DynamicRequest * rqst)
 {
   if (VideoSimulationState()!=LIVE_ON)
     {
       fprintf(stderr,"Warning : Camera already snapping\n");
-      rqst->content_size=0;
+      rqst->contentSize=0;
       return 0;
     }
 
   pthread_mutex_lock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
 
   fprintf(stderr,"Calling Camera callback \n");
-  rqst->content_size=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
+  rqst->contentSize=jpg_width * jpg_height * 3; //Signal the max allocated buffer , this value will be changed by RecordOneInMem
 
   unsigned long jpeg_size_refreshed=0;
   VideoInput_SaveFrameJPEGMemory( 0 , rqst->content , &jpeg_size_refreshed);
 
 
-  rqst->content_size  =  jpeg_size_refreshed;
-  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) rqst->content_size);
+  rqst->contentSize  =  jpeg_size_refreshed;
+  fprintf(stderr,"Calling Camera callback success new picture ( %u bytes long ) ready !\n",(unsigned int) rqst->contentSize);
 
   pthread_mutex_unlock (&refresh_jpeg_lock); // LOCK PROTECTED OPERATION -------------------------------------------
   return 0;
@@ -199,8 +199,8 @@ void init_dynamic_pages()
   //Do not empty jpeg_picture struct since mallocs have already happened.. memset(&jpeg_picture,0,sizeof(struct AmmServer_RH_Context));
 
   AmmServer_AddResourceHandler(v4l2_server,&jpeg_picture,(char *) "/cam.jpg",webserver_root,jpg_width * jpg_height * 3, 250 /*Poll camera no sooner than once every x ms*/,(void *) &prepare_camera_data_callback,DIFFERENT_PAGE_FOR_EACH_CLIENT);
-  jpeg_picture.requestContext.content_size=jpg_width * jpg_height * 3;
-  jpeg_picture.requestContext.MAX_content_size=jpg_width * jpg_height * 3;
+  jpeg_picture.requestContext.contentSize=jpg_width * jpg_height * 3;
+  jpeg_picture.requestContext.MAXcontentSize=jpg_width * jpg_height * 3;
 
   prepare_camera_data_callback(0); //Do a callback to populate content..!
 
