@@ -1,3 +1,12 @@
+
+
+
+This project is kind of depreciated :P 
+https://github.com/AmmarkoV/RGBDAcquisition
+
+will try to keep it working though
+
+
 A Small server application that uses my HTTP server and VideoInput  for V4L/V4L2 back-ends  to directly stream webcam input to the internet via http.. 
 
 Compiling should be quite easy , just run ./make ( ./make not make , it is a bash script ) on the directory you downloaded..
@@ -18,3 +27,4 @@ To stop the servers you can run ./killallinstances.sh
 That's about it , password protection and other features are inside but I'll have to make a more user-friendly configuration interface in the future..
  
 Bug reports/issues/fixes  are very much accepted , you can use the github issues thingy ( https://github.com/AmmarkoV/V4L2ToHTTP/issues )
+

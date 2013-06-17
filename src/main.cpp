@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     {
       //We were able to start camera so lets start everything else
 
-   v4l2_server = AmmServer_Start(bindIP,port,0,webserver_root,templates_root);
+   v4l2_server = AmmServer_Start("v4l2http",bindIP,port,0,webserver_root,templates_root);
    if (!v4l2_server) { fprintf(stderr,"Could not start webserver closing everything.."); close_camera(); exit(1); }
 
   if (ENABLE_PASSWORD_PROTECTION)
